@@ -1,0 +1,57 @@
+import edu.ucdavis.jr.*;
+
+public class Sieve {
+
+  public op void output(int num);
+  public op void startPipe(int num);
+
+  public Sieve() {
+    send filter(startPipe);
+    try {
+      JR.registerQuiescenceAction(done);
+    }
+    catch (QuiescenceRegistrationException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public op void done() {
+    System.out.println("Done.");
+  }
+
+  public process nums {
+    for(int i=3;i<10;i+=2)
+      call startPipe(i);
+    call startPipe(0);
+  }
+
+  public op void filter(cap void(int) inPipe) {
+    int prime, number;
+
+    receive inPipe(prime);
+    call output(prime);
+    if (prime > 0) {
+      op void outPipe(int);
+      send filter(outPipe);
+      
+      do {
+	receive inPipe(number);
+	if (number%prime > 0)
+	  call outPipe(number);
+      } while (number>0);
+      call outPipe(0);
+    }
+  }
+
+  public process print {
+    int number;
+    do {
+      receive output(number);
+      System.out.println(number);
+    } while (number>0);
+  }
+
+  public static void main(String[] args) {
+    Sieve s = new Sieve();
+  }
+}
